@@ -1,0 +1,91 @@
+package testHRM;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+import utility.All_Linkes;
+
+public class OrangeHRM implements All_Linkes {
+
+	WebDriver driver;
+
+	@BeforeTest
+	public void setUp() {
+
+		driver = new ChromeDriver();
+		driver.get("https://opensource-demo.orangehrmlive.com/web/index.php/auth/login");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(20));
+	}
+
+	@Test(priority = 2)
+	public void loginTestwithValidCredential() {
+
+		driver.findElement(By.xpath("//input[@name='username']")).sendKeys("Admin");
+		driver.findElement(By.xpath("//input[@type='password']")).sendKeys("admin123");
+		driver.findElement(By.xpath("//button[@type='submit']")).click();
+
+		// Verify if login was successful by checking the page title.
+		String pageTitle = driver.getTitle();
+		Assert.assertEquals(pageTitle,"OrangeHRM");
+	}
+	
+	@Test(priority = 1)
+	public void DologinTestwithInvalidCredential() throws InterruptedException {
+		driver.findElement(By.xpath("//input[@name='username']")).sendKeys("Admin");
+		driver.findElement(By.xpath("//input[@type='password']")).sendKeys("1234");
+		driver.findElement(By.xpath("//button[@type='submit']")).click();
+		
+		String msg_expected = "Invalid credentials";
+		String msg_actual = driver.findElement(By.xpath(exep_xpath)).getText();
+		
+		Assert.assertEquals(msg_expected, msg_actual);
+		Thread.sleep(1000);
+	}
+	
+	@Test(priority = 3 )
+	public void addEmployee () throws InterruptedException {
+		
+		
+		driver.findElement(By.xpath("//span[text()='PIM']")).click();
+		driver.findElement(By.xpath("//a[text()='Add Employee']")).click();
+		driver.findElement(By.xpath("//input[@placeholder='First Name']")).sendKeys("Anuj");
+		driver.findElement(By.xpath("//input[@placeholder='Middle Name']")).sendKeys("Kumar");
+		driver.findElement(By.xpath("//input[@placeholder='Last Name']")).sendKeys("Chauhan");
+		driver.findElement(By.xpath(emp_id_xpath)).sendKeys("1234");
+		
+		Thread.sleep(2000);
+		driver.findElement(By.xpath("//button[@type='submit']")).click();
+		
+		// Verify the Employee is Successfully add in the personal deatils.
+		String confi_msg = driver.findElement(By.xpath("//h6[normalize-space()='Personal Details']")).getText();
+		Assert.assertEquals(confi_msg, "Personal Details");
+					
+	}
+
+	
+	public void logOut() throws InterruptedException {
+		
+		driver.findElement(By.xpath("//i[@class='oxd-icon bi-caret-down-fill oxd-userdropdown-icon']")).click();
+		driver.findElement(By.xpath("//a[normalize-space()='Logout']")).click();
+		
+	}
+
+	@AfterTest
+	public void tearDown () throws InterruptedException {
+		
+		Thread.sleep(3000);
+		logOut();
+		Thread.sleep(5000);// wait 5 sec before logout.
+		driver.close();
+		driver.quit();
+	}
+
+}

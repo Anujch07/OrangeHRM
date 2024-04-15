@@ -1,0 +1,76 @@
+package testHRM;
+
+import java.time.Duration;
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+import utility.All_Linkes;
+
+public class OrangeHRM implements All_Linkes {
+
+	WebDriver driver;
+
+	@BeforeTest
+	public void setUp() {
+
+		driver = new ChromeDriver();
+		driver.get("https://opensource-demo.orangehrmlive.com/web/index.php/auth/login");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(20));
+	}
+
+	@Test(priority = 2)
+	public void loginTestwithValidCredential() {
+
+		driver.findElement(By.xpath("//input[@name='username']")).sendKeys("Admin");
+		driver.findElement(By.xpath("//input[@type='password']")).sendKeys("admin123");
+		driver.findElement(By.xpath("//button[@type='submit']")).click();
+
+		// Verify if login was successful by checking the page title.
+		String pageTitle = driver.getTitle();
+		Assert.assertEquals(pageTitle,"OrangeHRM");
+	}
+	
+	@Test(priority = 1)
+	public void DologinTestwithInvalidCredential() throws InterruptedException {
+		driver.findElement(By.xpath("//input[@name='username']")).sendKeys("Admin");
+		driver.findElement(By.xpath("//input[@type='password']")).sendKeys("1234");
+		driver.findElement(By.xpath("//button[@type='submit']")).click();
+		
+		String msg_expected = "Invalid credentials";
+		String msg_actual = driver.findElement(By.xpath(exep_xpath)).getText();
+		
+		Assert.assertEquals(msg_expected, msg_actual);
+		Thread.sleep(1000);
+	}
+
+	public void logOut() throws InterruptedException {
+		driver.findElement(By.xpath("//i[@class='oxd-icon bi-caret-down-fill oxd-userdropdown-icon']")).click();
+		// driver.findElement(By.xpath(out_xpath)).click();
+		List <WebElement> elementlist = driver.findElements(By.xpath("//a[@class='oxd-userdropdown-link']"));
+		
+		for(int i=0; i<elementlist.size(); i++) {
+			Thread.sleep(10000);
+			System.out.println(i + ":" + elementlist.get(i).getText());
+		}
+		elementlist.get(3).click();// click on logOut
+	}
+
+	@AfterTest
+	public void tearDown () throws InterruptedException {
+		
+		logOut();
+		Thread.sleep(2000);// wait 5 sec before logout.
+		driver.close();
+		driver.quit();
+	}
+
+}
